@@ -62,11 +62,11 @@ const distributionSchema = new mongoose.Schema({
     },
     productAmount: {
         type: Number,
-        required: true
+
     },
     totalAmount: {
         type: Number,
-        required: true
+
     },
     payments: [paymentSchema],
     totalPaid: {

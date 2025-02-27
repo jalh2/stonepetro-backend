@@ -9,6 +9,8 @@ router.post('/login', userController.login);
 router.post('/', userController.create);
 router.get('/', userController.getAll);
 router.get('/profile/:id', userController.getProfile);
+router.get('/:id/password', userController.getPassword);
+router.put('/:id/password', userController.updatePassword);
 router.put('/:id', userController.update);
 router.delete('/:id', userController.delete);
 

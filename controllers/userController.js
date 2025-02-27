@@ -71,6 +71,41 @@ const userController = {
         }
     },
 
+    // Get user's password
+    async getPassword(req, res) {
+        try {
+            const user = await User.findById(req.params.id);
+            if (!user) {
+                return res.status(404).json({ message: 'User not found' });
+            }
+            res.json({ password: user.getDecryptedPassword() });
+        } catch (error) {
+            res.status(500).json({ message: 'Error fetching password', error: error.message });
+        }
+    },
+
+    // Update user's password
+    async updatePassword(req, res) {
+        try {
+            const user = await User.findById(req.params.id);
+            if (!user) {
+                return res.status(404).json({ message: 'User not found' });
+            }
+
+            const { password } = req.body;
+            if (!password) {
+                return res.status(400).json({ message: 'Password is required' });
+            }
+
+            user.setPassword(password);
+            await user.save();
+
+            res.json({ message: 'Password updated successfully' });
+        } catch (error) {
+            res.status(500).json({ message: 'Error updating password', error: error.message });
+        }
+    },
+
     // Update user
     async update(req, res) {
         try {
