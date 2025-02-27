@@ -27,7 +27,7 @@ const distributionSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['pending', 'issued', 'approved', 'completed'],
+        enum: ['pending', 'issued', 'lifting', 'approved', 'completed'],
         default: 'pending'
     },
     date: {
