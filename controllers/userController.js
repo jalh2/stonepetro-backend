@@ -4,25 +4,30 @@ const userController = {
     // Create a new user
     async create(req, res) {
         try {
-            const { username, password, role } = req.body;
-
-            // Check if username already exists
-            const existingUser = await User.findOne({ username });
-            if (existingUser) {
-                return res.status(400).json({ message: 'Username already exists' });
-            }
-
+            console.log('Creating new user:', req.body.username);
             const user = new User({
-                username,
-                role
+                username: req.body.username,
+                role: req.body.role
             });
 
-            user.setPassword(password);
-            await user.save();
+            // Set and encrypt the password
+            console.log('Setting password for new user');
+            user.setPassword(req.body.password);
 
-            res.status(201).json({ message: 'User created successfully', user: user.toSafeObject() });
+            await user.save();
+            console.log('User created successfully');
+            
+            // Return user data without sensitive information
+            res.status(201).json({ 
+                message: 'User created successfully',
+                user: user.toSafeObject()
+            });
         } catch (error) {
-            res.status(500).json({ message: 'Error creating user', error: error.message });
+            console.error('Error creating user:', error);
+            res.status(500).json({ 
+                message: 'Error creating user', 
+                error: error.message 
+            });
         }
     },
 
@@ -67,20 +72,32 @@ const userController = {
             }
             res.json(user.toSafeObject());
         } catch (error) {
-            res.status(500).json({ message: 'Error fetching profile', error: error.message });
+            res.status(500).json({ message: 'Error retrieving user profile' });
         }
     },
 
     // Get user's password
     async getPassword(req, res) {
         try {
+            console.log('Getting password for user ID:', req.params.id);
             const user = await User.findById(req.params.id);
             if (!user) {
+                console.log('User not found');
                 return res.status(404).json({ message: 'User not found' });
             }
-            res.json({ password: user.getDecryptedPassword() });
+            
+            console.log('User found:', user.username);
+            try {
+                const decryptedPassword = user.getDecryptedPassword();
+                console.log('Password decrypted successfully');
+                res.json({ password: decryptedPassword });
+            } catch (decryptError) {
+                console.error('Error decrypting password:', decryptError);
+                res.status(500).json({ message: 'Error decrypting password', error: decryptError.message });
+            }
         } catch (error) {
-            res.status(500).json({ message: 'Error fetching password', error: error.message });
+            console.error('Error in getPassword:', error);
+            res.status(500).json({ message: 'Error retrieving password', error: error.message });
         }
     },
 
@@ -102,7 +119,32 @@ const userController = {
 
             res.json({ message: 'Password updated successfully' });
         } catch (error) {
-            res.status(500).json({ message: 'Error updating password', error: error.message });
+            res.status(500).json({ message: 'Error updating password' });
+        }
+    },
+
+    // Reset user's password
+    async resetPassword(req, res) {
+        try {
+            const user = await User.findById(req.params.id);
+            if (!user) {
+                return res.status(404).json({ message: 'User not found' });
+            }
+
+            const tempPassword = 'password123'; // You can generate a random password here
+            user.setPassword(tempPassword);
+            await user.save();
+
+            res.json({ 
+                message: 'Password reset successfully',
+                tempPassword: tempPassword // In production, send this via email
+            });
+        } catch (error) {
+            console.error('Error resetting password:', error);
+            res.status(500).json({ 
+                message: 'Error resetting password',
+                error: error.message
+            });
         }
     },
 
@@ -117,37 +159,36 @@ const userController = {
             }
 
             // Update allowed fields
-            const allowedUpdates = ['role'];
-            allowedUpdates.forEach(field => {
-                if (req.body[field] !== undefined) {
-                    user[field] = req.body[field];
-                }
-            });
-
-            // Update password if provided
-            if (req.body.password) {
-                user.setPassword(req.body.password);
-            }
-
+            if (req.body.username) user.username = req.body.username;
+            if (req.body.role) user.role = req.body.role;
+            
             await user.save();
             res.json({ message: 'User updated successfully', user: user.toSafeObject() });
         } catch (error) {
-            res.status(500).json({ message: 'Error updating user', error: error.message });
+            res.status(500).json({ message: 'Error updating user' });
         }
     },
 
     // Delete user
     async delete(req, res) {
         try {
+            console.log('Attempting to delete user:', req.params.id);
             const user = await User.findById(req.params.id);
             if (!user) {
                 return res.status(404).json({ message: 'User not found' });
             }
 
-            await user.remove();
+            // Use deleteOne instead of remove
+            await User.deleteOne({ _id: req.params.id });
+            console.log('User deleted successfully');
+            
             res.json({ message: 'User deleted successfully' });
         } catch (error) {
-            res.status(500).json({ message: 'Error deleting user', error: error.message });
+            console.error('Error deleting user:', error);
+            res.status(500).json({ 
+                message: 'Error deleting user', 
+                error: error.message 
+            });
         }
     }
 };

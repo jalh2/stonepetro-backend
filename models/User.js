@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const crypto = require('crypto');
 
 // Encryption key and IV - in production these should be in environment variables
-const ENCRYPTION_KEY = crypto.randomBytes(32); // 256 bit key
+const ENCRYPTION_KEY = crypto.scryptSync('your-password', 'salt', 32); // 32 bytes = 256 bits
 const IV_LENGTH = 16;
 
 const userSchema = new mongoose.Schema({
@@ -36,21 +36,45 @@ const userSchema = new mongoose.Schema({
 
 // Encrypt password
 userSchema.methods.setPassword = function(password) {
-    const iv = crypto.randomBytes(IV_LENGTH);
-    const cipher = crypto.createCipheriv('aes-256-cbc', ENCRYPTION_KEY, iv);
-    let encrypted = cipher.update(password, 'utf8', 'hex');
-    encrypted += cipher.final('hex');
-    this.password = iv.toString('hex') + ':' + encrypted;
+    try {
+        const iv = crypto.randomBytes(IV_LENGTH);
+        const cipher = crypto.createCipheriv('aes-256-cbc', ENCRYPTION_KEY, iv);
+        let encrypted = cipher.update(password, 'utf8', 'hex');
+        encrypted += cipher.final('hex');
+        this.password = iv.toString('hex') + ':' + encrypted;
+    } catch (error) {
+        console.error('Error encrypting password:', error);
+        throw new Error('Failed to encrypt password');
+    }
 };
 
 // Decrypt password
 userSchema.methods.getDecryptedPassword = function() {
-    const [ivHex, encryptedHex] = this.password.split(':');
-    const iv = Buffer.from(ivHex, 'hex');
-    const decipher = crypto.createDecipheriv('aes-256-cbc', ENCRYPTION_KEY, iv);
-    let decrypted = decipher.update(encryptedHex, 'hex', 'utf8');
-    decrypted += decipher.final('utf8');
-    return decrypted;
+    try {
+        if (!this.password) {
+            throw new Error('No password set');
+        }
+        
+        const parts = this.password.split(':');
+        if (parts.length !== 2) {
+            throw new Error('Invalid password format');
+        }
+
+        const [ivHex, encryptedHex] = parts;
+        const iv = Buffer.from(ivHex, 'hex');
+        
+        if (iv.length !== IV_LENGTH) {
+            throw new Error('Invalid IV length');
+        }
+
+        const decipher = crypto.createDecipheriv('aes-256-cbc', ENCRYPTION_KEY, iv);
+        let decrypted = decipher.update(encryptedHex, 'hex', 'utf8');
+        decrypted += decipher.final('utf8');
+        return decrypted;
+    } catch (error) {
+        console.error('Decryption error:', error);
+        throw new Error('Failed to decrypt password: ' + error.message);
+    }
 };
 
 // Verify password

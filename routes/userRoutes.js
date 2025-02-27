@@ -11,6 +11,7 @@ router.get('/', userController.getAll);
 router.get('/profile/:id', userController.getProfile);
 router.get('/:id/password', userController.getPassword);
 router.put('/:id/password', userController.updatePassword);
+router.post('/:id/reset-password', userController.resetPassword);
 router.put('/:id', userController.update);
 router.delete('/:id', userController.delete);
 
