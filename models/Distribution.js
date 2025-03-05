@@ -161,7 +161,6 @@ distributionSchema.pre('save', function(next) {
 // Pre-save middleware to calculate product amount
 distributionSchema.pre('save', function(next) {
     this.productAmount = this.gallons * this.unitPrice;
-    this.totalAmount = this.productAmount;
     next();
 });
 

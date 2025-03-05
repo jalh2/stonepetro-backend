@@ -41,7 +41,10 @@ const salesFloorSchema = new mongoose.Schema({
         required: true,
         default: 0
     },
-    history: [historySchema],
+    history: {
+        type: [historySchema],
+        default: []
+    },
     updatedAt: {
         type: Date,
         default: Date.now

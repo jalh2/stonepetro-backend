@@ -91,7 +91,7 @@ exports.getDistribution = async (req, res) => {
 // Update distribution status
 exports.updateDistributionStatus = async (req, res) => {
     try {
-        const { status, approvedBy } = req.body;
+        const { status } = req.body;
         if (!status || !['pending', 'issued', 'lifting', 'approved', 'completed'].includes(status)) {
             return res.status(400).json({ message: 'Invalid status' });
         }
@@ -110,10 +110,6 @@ exports.updateDistributionStatus = async (req, res) => {
 
         // If status is being changed to approved
         if (status === 'approved' && distribution.status !== 'approved') {
-            if (!approvedBy) {
-                return res.status(400).json({ message: 'Approval signature required' });
-            }
-
             try {
                 // Get the sales floor object
                 const salesFloor = await SalesFloor.findOne();
@@ -186,7 +182,7 @@ exports.updateDistributionStatus = async (req, res) => {
                 await salesFloor.save();
 
                 // Update distribution with approval info
-                distribution.approvedBy = approvedBy;
+                distribution.approvedBy = req.user ? req.user.username : 'System';
                 distribution.approvedAt = new Date();
                 distribution.status = status;
 

@@ -45,7 +45,10 @@ const storageBalanceSchema = new mongoose.Schema({
         type: String,
         default: 'gallons'
     },
-    transactions: [transactionSchema],
+    transactions: {
+        type: [transactionSchema],
+        default: []
+    },
     lastUpdated: {
         type: Date,
         default: Date.now

@@ -137,13 +137,12 @@ exports.updateTransferFormStatus = async (req, res) => {
 
             // 5. Update sales floor (add)
             salesFloor[salesFloorField] += transferForm.quantity;
-            salesFloor.transactions.push({
+            salesFloor.history.push({
+                type: 'transfer',
+                product: normalizedPetroleumType,
                 amount: transferForm.quantity,
-                type: 'addition',
-                petroleumType: normalizedPetroleumType,
-                date: new Date(),
-                description: `Transfer #${transferForm.formNumber} - Received from storage`,
-                transferId: transferForm._id
+                reference: `Transfer #${transferForm.formNumber}`,
+                date: new Date()
             });
             await salesFloor.save();
 
