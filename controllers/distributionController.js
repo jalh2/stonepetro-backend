@@ -92,13 +92,20 @@ exports.getDistribution = async (req, res) => {
 exports.updateDistributionStatus = async (req, res) => {
     try {
         const { status, approvedBy } = req.body;
-        if (!status || !['pending', 'issued', 'approved', 'completed'].includes(status)) {
+        if (!status || !['pending', 'issued', 'lifting', 'approved', 'completed'].includes(status)) {
             return res.status(400).json({ message: 'Invalid status' });
         }
 
         const distribution = await Distribution.findById(req.params.id);
         if (!distribution) {
             return res.status(404).json({ message: 'Distribution order not found' });
+        }
+
+        // For lifting status, we don't need to check sales floor balance
+        if (status === 'lifting') {
+            distribution.status = status;
+            await distribution.save();
+            return res.json(distribution);
         }
 
         // If status is being changed to approved
