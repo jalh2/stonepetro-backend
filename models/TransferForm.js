@@ -8,12 +8,12 @@ const transferFormSchema = new mongoose.Schema({
     },
     distributor: {
         type: String,
-        required: true
+        
     },
     petroleumType: {
         type: String,
         enum: ['PMS', 'AGO', 'KERO'],
-        required: true
+       
     },
     usGallons: {
         type: Number,
@@ -38,9 +38,25 @@ const transferFormSchema = new mongoose.Schema({
     approvedAt: {
         type: Date
     },
+    managerName: {
+        type: String,
+       
+    },
+    managerTitle: {
+        type: String,
+       
+    },
+    managerSection: {
+        type: String,
+       
+    },
+    managerCompany: {
+        type: String,
+       
+    },
     createdBy: {
         type: String,
-        required: true
+       
     },
     createdAt: {
         type: Date,
@@ -58,4 +74,6 @@ transferFormSchema.pre('save', function(next) {
     next();
 });
 
-module.exports = mongoose.model('TransferForm', transferFormSchema);
+const TransferForm = mongoose.model('TransferForm', transferFormSchema);
+
+module.exports = TransferForm;
