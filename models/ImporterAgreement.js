@@ -20,6 +20,9 @@ const importerAgreementSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    buyingImportersRepresentative: {
+        type: String
+    },
     quantityWords: {
         type: String,
         required: true
@@ -32,6 +35,12 @@ const importerAgreementSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    buyingImportersRepresentative: {
+        type: String
+    },
+    dmdOperations: {
+        type: String
+    },
     locatedAt: {
         type: String,
         required: true
@@ -41,16 +50,13 @@ const importerAgreementSchema = new mongoose.Schema({
         required: true
     },
     sellingImportersRepresentative: {
-        type: String,
-        required: true
+        type: String
     },
     operationsManager: {
-        type: String,
-        required: true
+        type: String
     },
     managingDirector: {
-        type: String,
-        required: true
+        type: String
     },
     status: {
         type: String,
