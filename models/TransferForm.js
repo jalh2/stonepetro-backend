@@ -39,16 +39,20 @@ const transferFormSchema = new mongoose.Schema({
         type: Date
     },
     managerName: {
-        type: String
+        type: String,
+        default: ""
     },
     managerTitle: {
-        type: String
+        type: String,
+        default: ""
     },
     managerSection: {
-        type: String
+        type: String,
+        default: ""
     },
     managerCompany: {
-        type: String
+        type: String,
+        default: ""
     },
     createdBy: {
         type: String,
